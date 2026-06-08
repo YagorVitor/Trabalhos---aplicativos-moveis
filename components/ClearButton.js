@@ -1,4 +1,7 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
+import { Trash2 } from 'lucide-react-native';
+
+import { colors, radius } from './theme';
 
 export default function ClearButton(props) {
   return (
@@ -9,7 +12,8 @@ export default function ClearButton(props) {
       ]}
       onPress={props.onClear}
     >
-      <Text style={styles.buttonText}>Limpar Tudo</Text>
+      <Trash2 size={18} color="#fecdd3" strokeWidth={2.5} />
+      <Text style={styles.buttonText}>Limpar todos os objetivos</Text>
     </Pressable>
   );
 }
@@ -17,17 +21,24 @@ export default function ClearButton(props) {
 const styles = StyleSheet.create({
   button: {
     marginTop: 16,
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: '#cc2936',
+    minHeight: 54,
+    paddingHorizontal: 18,
+    borderRadius: radius.md,
+    backgroundColor: 'rgba(251, 113, 133, 0.12)',
+    borderWidth: 1,
+    borderColor: 'rgba(251, 113, 133, 0.28)',
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
   },
   buttonPressed: {
-    opacity: 0.75,
+    opacity: 0.78,
+    transform: [{ scale: 0.98 }],
   },
   buttonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: '#fecdd3',
+    fontSize: 15,
+    fontWeight: '900',
   },
 });
