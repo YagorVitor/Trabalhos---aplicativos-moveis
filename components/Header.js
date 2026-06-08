@@ -1,38 +1,96 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { Sparkles, CalendarDays } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+
+import { colors, radius } from './theme';
 
 export default function Header(props) {
   return (
-    <View
-      style={[
-        styles.header,
-        { backgroundColor: props.corFundo || '#311b6b' },
-      ]}
+    <LinearGradient
+      colors={['rgba(139, 92, 246, 0.28)', 'rgba(34, 211, 238, 0.08)']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.hero}
     >
+      <View style={styles.topRow}>
+        <View style={styles.badge}>
+          <Sparkles size={15} color={colors.primaryLight} strokeWidth={2.8} />
+          <Text style={styles.badgeText}>Painel de metas</Text>
+        </View>
+
+        <View style={styles.yearBadge}>
+          <CalendarDays size={15} color={colors.cyan} strokeWidth={2.5} />
+          <Text style={styles.yearText}>2026</Text>
+        </View>
+      </View>
+
       <Text style={styles.title}>{props.titulo}</Text>
-    </View>
+
+      <Text style={styles.subtitle}>{props.subtitulo}</Text>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
-    paddingTop: 56,
-    paddingBottom: 24,
-    paddingHorizontal: 20,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOpacity: 0.18,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowRadius: 8,
+  hero: {
+    padding: 26,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    marginBottom: 18,
+  },
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 22,
+    gap: 12,
+  },
+  badge: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(15, 23, 42, 0.72)',
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+  },
+  badgeText: {
+    color: colors.primaryLight,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  yearBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(34, 211, 238, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(34, 211, 238, 0.22)',
+  },
+  yearText: {
+    color: colors.cyan,
+    fontSize: 13,
+    fontWeight: '900',
   },
   title: {
-    color: '#ffffff',
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    color: colors.text,
+    fontSize: 40,
+    lineHeight: 46,
+    fontWeight: '900',
+    letterSpacing: -1.2,
+  },
+  subtitle: {
+    marginTop: 12,
+    color: colors.textSoft,
+    fontSize: 16,
+    lineHeight: 24,
+    maxWidth: 680,
   },
 });

@@ -1,0 +1,21 @@
+{
+  "name": "trabalhos-aplicativos-moveis",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start",
+    "web": "expo start --web",
+    "android": "expo start --android"
+  },
+  "dependencies": {
+    "expo": "latest",
+    "expo-linear-gradient": "~56.0.4",
+    "lucide-react-native": "^1.17.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.85.3",
+    "react-native-svg": "15.15.4",
+    "react-native-web": "^0.21.2"
+  }
+}
