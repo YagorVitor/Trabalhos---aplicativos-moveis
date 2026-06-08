@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { Sparkles, CalendarDays } from 'lucide-react-native';
+import { CalendarDays, Sparkles } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { colors, radius } from './theme';
@@ -7,15 +7,15 @@ import { colors, radius } from './theme';
 export default function Header(props) {
   return (
     <LinearGradient
-      colors={['rgba(139, 92, 246, 0.28)', 'rgba(34, 211, 238, 0.08)']}
+      colors={['rgba(139, 92, 246, 0.30)', 'rgba(34, 211, 238, 0.08)']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      style={styles.hero}
+      style={[styles.hero, props.isCompact && styles.heroCompact]}
     >
       <View style={styles.topRow}>
         <View style={styles.badge}>
           <Sparkles size={15} color={colors.primaryLight} strokeWidth={2.8} />
-          <Text style={styles.badgeText}>Painel de metas</Text>
+          <Text style={styles.badgeText}>Hub pessoal</Text>
         </View>
 
         <View style={styles.yearBadge}>
@@ -24,7 +24,9 @@ export default function Header(props) {
         </View>
       </View>
 
-      <Text style={styles.title}>{props.titulo}</Text>
+      <Text style={[styles.title, props.isCompact && styles.titleCompact]}>
+        {props.titulo}
+      </Text>
 
       <Text style={styles.subtitle}>{props.subtitulo}</Text>
     </LinearGradient>
@@ -38,6 +40,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.borderStrong,
     marginBottom: 18,
+  },
+  heroCompact: {
+    padding: 20,
+    borderRadius: radius.lg,
   },
   topRow: {
     flexDirection: 'row',
@@ -86,11 +92,15 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: -1.2,
   },
+  titleCompact: {
+    fontSize: 30,
+    lineHeight: 36,
+  },
   subtitle: {
     marginTop: 12,
     color: colors.textSoft,
     fontSize: 16,
     lineHeight: 24,
-    maxWidth: 680,
+    maxWidth: 740,
   },
 });
