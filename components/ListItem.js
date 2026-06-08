@@ -1,29 +1,47 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { CheckCircle2, Trash2 } from 'lucide-react-native';
 
+import SectionIcon from './SectionIcon';
 import { colors, radius } from './theme';
 
-export default function GoalItem(props) {
+export default function ListItem(props) {
   return (
     <Pressable
+      android_ripple={{ color: 'rgba(167, 139, 250, 0.18)' }}
       style={({ pressed }) => [
-        styles.goalItem,
-        pressed && styles.goalItemPressed,
+        styles.item,
+        pressed && styles.itemPressed,
       ]}
-      onPress={props.onDelete}
+      onPress={props.onDeleteItem.bind(this, props.id)}
     >
       <View style={styles.left}>
-        <View style={styles.indexBox}>
-          <Text style={styles.indexText}>{props.index + 1}</Text>
+        <View
+          style={[
+            styles.marker,
+            {
+              backgroundColor: `${props.accent}22`,
+              borderColor: `${props.accent}66`,
+            },
+          ]}
+        >
+          <SectionIcon
+            sectionId={props.sectionId}
+            color={props.accent}
+            size={20}
+          />
         </View>
 
         <View style={styles.content}>
           <View style={styles.titleRow}>
-            <CheckCircle2 size={18} color={colors.green} strokeWidth={2.6} />
-            <Text style={styles.goalText}>{props.text}</Text>
+            <CheckCircle2 size={18} color={props.accent} strokeWidth={2.6} />
+            <Text style={styles.itemText}>{props.text}</Text>
           </View>
 
-          <Text style={styles.helperText}>Clique para remover da lista</Text>
+          <View style={styles.metaRow}>
+            <Text style={styles.sectionLabel}>{props.sectionLabel}</Text>
+            <Text style={styles.dot}>•</Text>
+            <Text style={styles.createdAt}>{props.createdAt}</Text>
+          </View>
         </View>
       </View>
 
@@ -35,7 +53,7 @@ export default function GoalItem(props) {
 }
 
 const styles = StyleSheet.create({
-  goalItem: {
+  item: {
     marginBottom: 12,
     padding: 16,
     borderRadius: radius.lg,
@@ -46,8 +64,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 14,
+    overflow: 'hidden',
   },
-  goalItemPressed: {
+  itemPressed: {
     opacity: 0.78,
     transform: [{ scale: 0.99 }],
   },
@@ -56,41 +75,52 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    minWidth: 0,
   },
-  indexBox: {
-    width: 42,
-    height: 42,
+  marker: {
+    width: 44,
+    height: 44,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(167, 139, 250, 0.14)',
     borderWidth: 1,
-    borderColor: 'rgba(167, 139, 250, 0.24)',
-  },
-  indexText: {
-    color: colors.primaryLight,
-    fontWeight: '900',
-    fontSize: 14,
   },
   content: {
     flex: 1,
+    minWidth: 0,
   },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 9,
   },
-  goalText: {
+  itemText: {
     flex: 1,
     color: colors.text,
     fontSize: 16,
     fontWeight: '800',
   },
-  helperText: {
-    marginTop: 5,
+  metaRow: {
+    marginTop: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    flexWrap: 'wrap',
+  },
+  sectionLabel: {
     color: colors.textMuted,
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '800',
+  },
+  dot: {
+    color: colors.textDim,
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  createdAt: {
+    color: colors.textDim,
+    fontSize: 12,
+    fontWeight: '700',
   },
   deleteBox: {
     width: 42,

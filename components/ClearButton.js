@@ -6,6 +6,7 @@ import { colors, radius } from './theme';
 export default function ClearButton(props) {
   return (
     <Pressable
+      android_ripple={{ color: 'rgba(251, 113, 133, 0.18)' }}
       style={({ pressed }) => [
         styles.button,
         pressed && styles.buttonPressed,
@@ -13,14 +14,14 @@ export default function ClearButton(props) {
       onPress={props.onClear}
     >
       <Trash2 size={18} color="#fecdd3" strokeWidth={2.5} />
-      <Text style={styles.buttonText}>Limpar todos os objetivos</Text>
+      <Text style={styles.buttonText}>Limpar agenda inteira</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   button: {
-    marginTop: 16,
+    marginTop: 4,
     minHeight: 54,
     paddingHorizontal: 18,
     borderRadius: radius.md,
@@ -31,6 +32,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
+    overflow: 'hidden',
   },
   buttonPressed: {
     opacity: 0.78,

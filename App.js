@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   FlatList,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   useWindowDimensions,
@@ -10,48 +11,76 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 
 import Header from './components/Header';
-import GoalCount from './components/GoalCount';
+import ItemInput from './components/ItemInput';
+import ListItem from './components/ListItem';
+import SectionTabs from './components/SectionTabs';
+import AgendaStats from './components/AgendaStats';
+import EmptyState from './components/EmptyState';
 import ClearButton from './components/ClearButton';
-import GoalInput from './components/GoalInput';
-import GoalItem from './components/GoalItem';
+import SectionIcon from './components/SectionIcon';
+import { AGENDA_SECTIONS, ALL_SECTION } from './components/sectionConfig';
 import { colors, radius, shadow } from './components/theme';
 
 export default function App() {
-  const { height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
+  const isCompact = width < 720;
 
-  const [enteredGoalText, setEnteredGoalText] = useState('');
-  const [courseGoals, setCourseGoals] = useState([]);
+  const [agendaItems, setAgendaItems] = useState([]);
+  const [activeSectionId, setActiveSectionId] = useState('all');
 
-  function inputHandler(enteredText) {
-    setEnteredGoalText(enteredText);
-  }
+  const sectionsWithAll = [ALL_SECTION, ...AGENDA_SECTIONS];
 
-  function addGoalHandler() {
-    const trimmedGoal = enteredGoalText.trim();
+  const visibleItems = useMemo(() => {
+    if (activeSectionId === 'all') {
+      return agendaItems;
+    }
 
-    if (!trimmedGoal) {
+    return agendaItems.filter((item) => item.sectionId === activeSectionId);
+  }, [agendaItems, activeSectionId]);
+
+  const activeSection =
+    sectionsWithAll.find((section) => section.id === activeSectionId) ||
+    ALL_SECTION;
+
+  function addItemHandler(itemText, sectionId) {
+    const trimmedText = itemText.trim();
+
+    if (!trimmedText) {
       return;
     }
 
-    setCourseGoals((currentCourseGoals) => [
+    setAgendaItems((currentItems) => [
       {
-        text: trimmedGoal,
-        id: Date.now().toString(),
+        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        text: trimmedText,
+        sectionId,
+        createdAt: new Date().toLocaleString('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
       },
-      ...currentCourseGoals,
+      ...currentItems,
     ]);
-
-    setEnteredGoalText('');
   }
 
-  function deleteGoalHandler(goalId) {
-    setCourseGoals((currentCourseGoals) =>
-      currentCourseGoals.filter((goal) => goal.id !== goalId)
+  function deleteItemHandler(itemId) {
+    setAgendaItems((currentItems) =>
+      currentItems.filter((item) => item.id !== itemId)
     );
   }
 
   function clearAllHandler() {
-    setCourseGoals([]);
+    setAgendaItems([]);
+    setActiveSectionId('all');
+  }
+
+  function getSectionById(sectionId) {
+    return (
+      AGENDA_SECTIONS.find((section) => section.id === sectionId) ||
+      AGENDA_SECTIONS[0]
+    );
   }
 
   return (
@@ -59,66 +88,109 @@ export default function App() {
       colors={['#030712', '#07111f', '#120b2f']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      style={[styles.screen, { minHeight: height }]}
+      style={styles.screen}
     >
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.glowPurple} />
         <View style={styles.glowCyan} />
 
-        <View style={styles.page}>
-          <View style={styles.appShell}>
-            <Header
-              titulo="Meus Objetivos de 2026"
-              subtitulo="Organize suas metas, acompanhe seu progresso e transforme intenção em rotina."
-            />
+        <ScrollView
+          style={styles.scroll}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={[
+            styles.scrollContent,
+            isCompact && styles.scrollContentCompact,
+          ]}
+        >
+          <View style={[styles.page, isCompact && styles.pageCompact]}>
+            <View style={[styles.appShell, isCompact && styles.appShellCompact]}>
+              <Header
+                titulo="Agenda Pessoal Inteligente"
+                subtitulo="Centralize objetivos, compras, estudos, ideias e compromissos em uma experiência modular e organizada."
+                isCompact={isCompact}
+              />
 
-            <GoalInput
-              enteredGoalText={enteredGoalText}
-              onInputChange={inputHandler}
-              onAddGoal={addGoalHandler}
-            />
+              <AgendaStats
+                items={agendaItems}
+                sections={AGENDA_SECTIONS}
+                isCompact={isCompact}
+              />
 
-            <GoalCount quantidade={courseGoals.length} />
+              <SectionTabs
+                sections={sectionsWithAll}
+                activeSectionId={activeSectionId}
+                onChangeSection={setActiveSectionId}
+                items={agendaItems}
+              />
 
-            <View style={styles.goalsContainer}>
-              {courseGoals.length === 0 ? (
-                <View style={styles.emptyCard}>
-                  <View style={styles.emptyIconBox}>
-                    <Text style={styles.emptyIcon}>✦</Text>
+              <ItemInput
+                sections={AGENDA_SECTIONS}
+                activeSectionId={activeSectionId}
+                onAddItem={addItemHandler}
+                isCompact={isCompact}
+              />
+
+              <View style={styles.listHeader}>
+                <View style={styles.listTitleGroup}>
+                  <Text style={styles.listEyebrow}>Seção atual</Text>
+
+                  <View style={styles.listTitleRow}>
+                    <View
+                      style={[
+                        styles.listIconBox,
+                        { borderColor: `${activeSection.accent}66` },
+                      ]}
+                    >
+                      <SectionIcon
+                        sectionId={activeSection.id}
+                        color={activeSection.accent}
+                        size={18}
+                      />
+                    </View>
+
+                    <Text style={styles.listTitle}>{activeSection.label}</Text>
                   </View>
-
-                  <Text style={styles.emptyTitle}>
-                    Nenhum objetivo cadastrado
-                  </Text>
-
-                  <Text style={styles.emptyText}>
-                    Adicione sua primeira meta para começar. Objetivos pequenos,
-                    claros e visíveis são mais fáceis de cumprir.
-                  </Text>
                 </View>
+
+                <Text style={styles.listCount}>
+                  {visibleItems.length} {visibleItems.length === 1 ? 'item' : 'itens'}
+                </Text>
+              </View>
+
+              {visibleItems.length === 0 ? (
+                <EmptyState section={activeSection} />
               ) : (
                 <FlatList
-                  data={courseGoals}
+                  data={visibleItems}
                   keyExtractor={(item) => item.id}
-                  alwaysBounceVertical={false}
+                  scrollEnabled={false}
                   showsVerticalScrollIndicator={false}
                   contentContainerStyle={styles.listContent}
-                  renderItem={({ item, index }) => (
-                    <GoalItem
-                      text={item.text}
-                      index={index}
-                      onDelete={() => deleteGoalHandler(item.id)}
-                    />
-                  )}
+                  renderItem={({ item }) => {
+                    const section = getSectionById(item.sectionId);
+
+                    return (
+                      <ListItem
+                        id={item.id}
+                        text={item.text}
+                        createdAt={item.createdAt}
+                        sectionId={section.id}
+                        sectionLabel={section.label}
+                        accent={section.accent}
+                        onDeleteItem={deleteItemHandler}
+                      />
+                    );
+                  }}
                 />
               )}
-            </View>
 
-            {courseGoals.length > 0 && (
-              <ClearButton onClear={clearAllHandler} />
-            )}
+              {agendaItems.length > 0 && (
+                <ClearButton onClear={clearAllHandler} />
+              )}
+            </View>
           </View>
-        </View>
+        </ScrollView>
       </SafeAreaView>
     </LinearGradient>
   );
@@ -127,11 +199,24 @@ export default function App() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+    minHeight: '100%',
     backgroundColor: colors.background,
   },
   safeArea: {
     flex: 1,
     overflow: 'hidden',
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingVertical: 28,
+    paddingHorizontal: 22,
+  },
+  scrollContentCompact: {
+    paddingVertical: 14,
+    paddingHorizontal: 14,
   },
   glowPurple: {
     position: 'absolute',
@@ -152,15 +237,15 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(34, 211, 238, 0.10)',
   },
   page: {
-    flex: 1,
     width: '100%',
-    maxWidth: 980,
+    maxWidth: 1040,
     alignSelf: 'center',
-    paddingHorizontal: 22,
-    paddingVertical: 28,
+  },
+  pageCompact: {
+    maxWidth: '100%',
   },
   appShell: {
-    flex: 1,
+    width: '100%',
     padding: 22,
     borderRadius: radius.xl,
     backgroundColor: colors.shell,
@@ -168,52 +253,56 @@ const styles = StyleSheet.create({
     borderColor: colors.shellBorder,
     ...shadow,
   },
-  goalsContainer: {
-    flex: 1,
+  appShellCompact: {
+    padding: 16,
+    borderRadius: radius.lg,
+  },
+  listHeader: {
     marginTop: 18,
+    marginBottom: 12,
+    paddingHorizontal: 2,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  listTitleGroup: {
+    flex: 1,
+  },
+  listEyebrow: {
+    color: colors.textDim,
+    fontSize: 12,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  listTitleRow: {
+    marginTop: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  listIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(15, 23, 42, 0.88)',
+    borderWidth: 1,
+  },
+  listTitle: {
+    flex: 1,
+    color: colors.text,
+    fontSize: 22,
+    fontWeight: '900',
+  },
+  listCount: {
+    color: colors.textMuted,
+    fontSize: 13,
+    fontWeight: '800',
   },
   listContent: {
-    paddingBottom: 8,
-  },
-  emptyCard: {
-    flex: 1,
-    minHeight: 260,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 32,
-    borderRadius: radius.lg,
-    backgroundColor: 'rgba(15, 23, 42, 0.78)',
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  emptyIconBox: {
-    width: 64,
-    height: 64,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(139, 92, 246, 0.16)',
-    borderWidth: 1,
-    borderColor: colors.borderStrong,
-    marginBottom: 18,
-  },
-  emptyIcon: {
-    color: colors.primaryLight,
-    fontSize: 34,
-    fontWeight: '900',
-  },
-  emptyTitle: {
-    color: colors.text,
-    fontSize: 24,
-    fontWeight: '900',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  emptyText: {
-    color: colors.textMuted,
-    fontSize: 15,
-    lineHeight: 23,
-    textAlign: 'center',
-    maxWidth: 500,
+    paddingBottom: 2,
   },
 });
